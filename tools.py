@@ -35,8 +35,11 @@ def read_data(BASE_DIR,saveto):
 
     xpol = ch1 + 1j * ch2
     ypol = ch3 + 1j * ch4
-
+    from scipy.io import savemat
+    # savemat(saveto,dict(samples = np.vstack((xpol,ypol))))
     np.savez(saveto,np.vstack((xpol,ypol)))
 
 if __name__ == '__main__':
-    pass
+    import tqdm
+    for i in tqdm.tqdm(range(20),ascii=True):
+        read_data(f'./5dbm/{i+1}',f'{i}.npz')

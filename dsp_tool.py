@@ -9,6 +9,9 @@ import numpy as np
 
 import numba
 
+from helpClass import Signal
+
+
 def __segment_axis(a, length, overlap, mode='cut', append_to_end=0):
     """
         Generate a new array that chops the given array along the given axis into
@@ -91,11 +94,11 @@ def get_time_vector(length,fs):
 
 
 
-def normalise_and_center(E):
+def normalise_and_center(signal):
     def cabssquared(x):
         """Calculate the absolute squared of a complex number"""
         return x.real ** 2 + x.imag ** 2
-
+    E = signal[:]
     if E.ndim > 1:
         E = E - np.mean(E, axis=-1)[:, np.newaxis]
         P = np.sqrt(np.mean(cabssquared(E), axis=-1))
@@ -104,7 +107,11 @@ def normalise_and_center(E):
         E = E.real - np.mean(E.real) + 1.j * (E.imag - np.mean(E.imag))
         P = np.sqrt(np.mean(cabssquared(E)))
         E /= P
-    return E
+    if isinstance(signal,Signal):
+        signal.samples = E
+        return signal
+    else:
+        return E
 
 
 @numba.njit(cache=True)

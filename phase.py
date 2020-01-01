@@ -9,7 +9,11 @@ import numpy as np
 import numba
 from numba import prange
 from scipy.signal import lfilter
-def find_freq_offset(sig, fs,average_over_modes = True, fft_size = 2**16):
+
+from helpClass import Signal
+
+
+def find_freq_offset(sig, fs,average_over_modes = True, fft_size = 2**18):
     """
     Find the frequency offset by searching in the spectrum of the signal
     raised to 4. Doing so eliminates the modulation for QPSK but the method also
@@ -123,7 +127,7 @@ def segment_find_freq(signal,fs,group,apply=True):
     
     for idx,(xpol_row,ypol_row) in enumerate(zip(xpol,ypol)):
         array = np.array([xpol_row,ypol_row])      
-        freq = find_freq_offset(array,fs)
+        freq = find_freq_offset(array,fs,fft_size=xpol.shape[1])
         phase[idx] = 2*np.pi*freq*time_vector_segment+last_point
         freq_offset.append(freq)
         last_point = phase[idx,-1]
@@ -133,8 +137,12 @@ def segment_find_freq(signal,fs,group,apply=True):
     
     xpol = xpol.flatten()
     ypol = ypol.flatten()
-    
-    return np.array([xpol,ypol]),freq_offset
+
+    if isinstance(signal,Signal):
+        signal.samples = np.array([xpol,ypol])
+        return signal,freq_offset
+    else:
+        return np.array([xpol,ypol]),freq_offset
         
         
         
